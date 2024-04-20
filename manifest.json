@@ -1,0 +1,9 @@
+{
+    "name": "Traffic Harmony",
+    "short_name": "Traffic Harmony",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fff",
+    "theme_color": "#fff",
+    "description": "Just a chill traffic game."
+}
