@@ -1,12 +1,18 @@
-let settings = {
-    showGrid: true
+let defaultSetting = {
+    showGrid: true,
+    showGridCoords: true,
+
+    showVehicles: true,
+    showRoads: true,
+    showBuildings: true,
 }
 
-for (let key in settings) {
-    if (localStorage.getItem(key) === null) {
-        localStorage.setItem(key, settings[key]);
-    }
-    else {
-        settings[key] = (localStorage.getItem(key) == 'true');
+function initSettings() {
+    for (let key in defaultSetting) {
+        if (localStorage.getItem(key) === null || localStorage.getItem(key) === undefined) {
+            localStorage.setItem(key, defaultSetting[key]);
+        }
     }
 }
+
+export { initSettings };

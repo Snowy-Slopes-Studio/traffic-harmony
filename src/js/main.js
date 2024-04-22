@@ -1,22 +1,45 @@
 import { Playground } from "./game/playground.js";
 import { Vehicle } from "./game/vehicles.js";
-import { Parking, Road } from "./game/infras.js";
+import { Parking, Road, Junction } from "./game/infras.js";
+import { initSettings } from "./game/settings.js";
 
-const canva = document.getElementById('playground');
+initSettings();
 
-const playground = new Playground(canva);
+const canvas = document.getElementById('playground');
+
+const playground = new Playground(canvas);
 
 // Example
-const road = new Road({ x: 160, y: 130 }, { x: 500, y: 130 });
-playground.addInfra(road);
+const junction1 = new Junction({ x: 320, y: 120 });
+playground.map.addRoad(junction1);
+
+const road1 = new Road({ x: 160, y: 130 }, { x: 320, y: 130 });
+playground.map.addRoad(road1);
+road1.connectTo(junction1, { x: 160, y: 130 });
 
 const parking1 = new Parking({ x: 100, y: 100 }, { x: 60, y: 60 }, 10);
-playground.addInfra(parking1);
-parking1.connectTo(road, { x: 160, y: 130 });
+playground.map.addBuilding(parking1);
+parking1.connectTo(road1, { x: 160, y: 130 });
+
+const road2 = new Road({ x: 340, y: 130 }, { x: 500, y: 130 });
+playground.map.addRoad(road2);
+road2.connectTo(junction1, { x: 500, y: 130 });
 
 const parking2 = new Parking({ x: 500, y: 100 }, { x: 60, y: 60 }, 10);
-playground.addInfra(parking2);
-parking2.connectTo(road, { x: 500, y: 130 });
+playground.map.addBuilding(parking2);
+parking2.connectTo(road2, { x: 500, y: 130 });
+
+const road3 = new Road({ x: 330, y: 140 }, { x: 330, y: 320 });
+playground.map.addRoad(road3);
+road3.connectTo(junction1, { x: 160, y: 160 });
+
+const road4 = new Road({ x: 260, y: 330 }, { x: 340, y: 330 });
+playground.map.addRoad(road4);
+road4.connectTo(road3, { x: 160, y: 160 });
+
+const parking3 = new Parking({ x: 200, y: 300 }, { x: 60, y: 60 }, 10);
+playground.map.addBuilding(parking3);
+parking3.connectTo(road4, { x: 200, y: 300 });
 
 const vehicle = new Vehicle({ x: 100, y: 100 }, { x: 100, y: 100 }, { x: 500, y: 100 });
 parking1.addVehicle(vehicle);

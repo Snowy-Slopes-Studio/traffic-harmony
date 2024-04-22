@@ -1,56 +1,40 @@
+import { Entities } from './vehicles.js';
+import { Background } from './background.js';
+import { Map } from './infras.js';
+import { UI} from './ui.js';
+
 class Playground {
-    constructor(canva) {
-        this.canva = canva;
+    constructor(playground) {
         this.vehicles = [];
-        this.infras = [];
+        this.buildings = [];
+        this.roads = [];
 
-        if (localStorage.getItem('showGrid') == 'true') { this.showGrid(); }
-        else { this.hideGrid(); }
+        this.background = new Background(playground.querySelector('#background'));
+        this.map = new Map(playground.querySelector('#map'));
+        this.entities = new Entities(playground.querySelector('#entities'));
+        this.ui = new UI(playground.querySelector('#ui'));
 
-        window.addEventListener('storage', (e) => {
-            if (e.key == 'showGrid') {
-                this.redraw();
-            }
-        });
+        this.layers = [this.background, this.map, this.entities, this.ui];
 
-        
-        canva.width = window.innerWidth;
-        canva.height = window.innerHeight;
+        // console.log(this.background, this.map, this.entities, this.ui);
 
-        window.addEventListener('resize', () => {
-            canva.width = window.innerWidth;
-            canva.height = window.innerHeight;
-            this.redraw();
+        this.redraw();
+
+        window.addEventListener('resize', () => { this.resize(); });
+    }
+
+    resize() {
+        this.layers.forEach(layer => {
+            layer.resize();
+            layer.redraw();
         });
     }
 
     // Draw
     redraw() {
-        this.hideGrid();
-        if (localStorage.getItem('showGrid') == 'true') { this.showGrid(); }
-        this.vehicles.forEach(vehicle => vehicle.draw(this.canva));
-        this.infras.forEach(infra => infra.draw(this.canva));
-    }
-    clear() {
-        const ctx = this.canva.getContext('2d');
-        ctx.clearRect(0, 0, this.canva.width, this.canva.height);
-    }
-
-    // Grid
-    showGrid() {
-        const ctx = this.canva.getContext('2d');
-        const svg = new Image();
-        svg.src = 'src/assets/textures/grid.svg';
-        svg.onload = () => {
-            const pattern = ctx.createPattern(svg, 'repeat');
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.canva.width, this.canva.height);
-        }
-    }
-    hideGrid() {
-        const ctx = this.canva.getContext('2d');
-        ctx.clearRect(0, 0, this.canva.width, this.canva.height);
-        console.log('hideGrid');
+        this.layers.forEach(layer => {
+            layer.redraw();
+        });
     }
 
     // Animation
@@ -65,30 +49,6 @@ class Playground {
         this.vehicles.forEach(vehicle => {
             vehicle.stop();
         });
-    }
-
-    // Vehicles
-    addVehicle(vehicle) {
-        this.vehicles.push(vehicle);
-        vehicle.draw(this.canva);
-    }
-    getVehicles() {
-        return this.vehicles;
-    }
-    clearVehicles() {
-        this.vehicles = [];
-    }
-
-    // Infrastructures
-    addInfra(infra) {
-        this.infras.push(infra);
-        infra.draw(this.canva);
-    }
-    getInfras() {
-        return this.infras;
-    }
-    clearInfras() {
-        this.infras = [];
     }
 }
 
