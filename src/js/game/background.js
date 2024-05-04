@@ -1,6 +1,10 @@
-class Background {
-    constructor(canvas) {
-        this.canvas = canvas;
+import { Layer } from "./layers.js";
+
+class Background extends Layer {
+    constructor(canvas, playground) {
+        super(canvas, playground);
+
+        this.scale = Number(localStorage.getItem('scale'));
 
         this.resize();
         window.addEventListener('storage', (e) => {
@@ -10,31 +14,31 @@ class Background {
         });
     }
 
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        // this.redraw();
-    }
     redraw() {
-        this.hideGrid();
+        this.clear();
+        this.scale = Number(localStorage.getItem('scale'));
         if (localStorage.getItem('showGrid') == 'true') { this.showGrid(); }
     }
 
     // Grid
     showGrid() {
         const ctx = this.canvas.getContext('2d');
-        const svg = new Image();
-        svg.src = 'src/assets/textures/grid.svg';
-        svg.onload = () => {
-            const pattern = ctx.createPattern(svg, 'repeat');
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let x = 0; x < this.canvas.width; x += this.scale) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#B7B7B7';
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, this.canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < this.canvas.height; y += this.scale) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#B7B7B7';
+            ctx.moveTo(0, y);
+            ctx.lineTo(this.canvas.width, y);
+            ctx.stroke();
         }
     }
-    hideGrid() {
-        const ctx = this.canvas.getContext('2d');
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
+    
 }
 
 export { Background };

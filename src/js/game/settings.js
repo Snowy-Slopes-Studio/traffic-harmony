@@ -1,6 +1,11 @@
 let defaultSetting = {
     showGrid: true,
     showGridCoords: true,
+    GridCoords: 'numeric', // alphaNumeric, numeric
+
+    scale: 20,
+    timeStep: 10, // ms
+    timeSpeed: 1,
 
     showVehicles: true,
     showRoads: true,

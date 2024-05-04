@@ -3,20 +3,34 @@ import { Background } from './background.js';
 import { Map } from './infras.js';
 import { UI} from './ui.js';
 
+/**
+ * Playground class
+ */
 class Playground {
+    /**
+     * Playground
+     * @param {HTMLElement} playground
+     */
     constructor(playground) {
         this.vehicles = [];
         this.buildings = [];
         this.roads = [];
 
-        this.background = new Background(playground.querySelector('#background'));
-        this.map = new Map(playground.querySelector('#map'));
-        this.entities = new Entities(playground.querySelector('#entities'));
-        this.ui = new UI(playground.querySelector('#ui'));
+        this.canvas = playground;
+
+        this.canvas.addEventListener('click', (e) => {
+        });
+
+        this.background = new Background(playground.querySelector('#background'), this);
+        this.map = new Map(playground.querySelector('#map'), this);
+        this.entities = new Entities(playground.querySelector('#entities'), this);
+        this.ui = new UI(playground.querySelector('#ui'), this);
 
         this.layers = [this.background, this.map, this.entities, this.ui];
 
-        // console.log(this.background, this.map, this.entities, this.ui);
+        this.entities.layers = this.layers;
+
+        this.scale = localStorage.getItem('scale');
 
         this.redraw();
 
@@ -29,25 +43,10 @@ class Playground {
             layer.redraw();
         });
     }
-
     // Draw
     redraw() {
         this.layers.forEach(layer => {
             layer.redraw();
-        });
-    }
-
-    // Animation
-    play() {
-        this.vehicles.forEach(vehicle => {
-            vehicle.move();
-            this.redraw();
-        });
-    }
-
-    pause() {
-        this.vehicles.forEach(vehicle => {
-            vehicle.stop();
         });
     }
 }

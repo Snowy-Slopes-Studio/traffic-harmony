@@ -1,8 +1,11 @@
 import { columnToLetters } from "../lib/MRLib/coords.js";
 
-class UI {
-    constructor(canvas) {
-        this.canvas = canvas;
+import { Layer } from './layers.js';
+
+
+class UI extends Layer {
+    constructor(canvas, playground) {
+        super(canvas, playground);
 
         this.ui = [new GridCoords()];
 
@@ -11,14 +14,11 @@ class UI {
         window.addEventListener('resize', () => { this.resize(); });
 
         window.addEventListener('storage', (e) => { if (e.key == 'showGridCoords') { this.redraw(); } });
+        window.addEventListener('storage', (e) => { if (e.key == 'coordsSystem') { this.redraw(); } });
     }
 
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.redraw();
-    }
     redraw() {
+        this.clear();
         this.ui.forEach(element => element.redraw(this.canvas));
     }
 }
@@ -30,19 +30,23 @@ class GridCoords {
     redraw(canvas) {
         if (localStorage.getItem('showGridCoords') != 'true') { return; }
         const ctx = canvas.getContext('2d');
-        for (let x = 1; x < canvas.width/20; x += 1) {
+        for (let x = 1; x < canvas.width/Number(localStorage.getItem('scale')); x += 1) {
             ctx.fillStyle = '#8D8D8D';
-            ctx.font = '10px Arial';
+            ctx.font = `${.5*Number(localStorage.getItem('scale'))}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`${columnToLetters(x)}`, x*20+10, 11);
+            if (localStorage.getItem('coordsSystem') == 'alphaNumeric') {
+                ctx.fillText(`${columnToLetters(x)}`, (x+.5)*Number(localStorage.getItem('scale')), 11);
+            } else if (localStorage.getItem('coordsSystem') == 'numeric') {
+                ctx.fillText(`${x}`, (x+.5)*Number(localStorage.getItem('scale')), 0.55*Number(localStorage.getItem('scale')));
+            }
         }
-        for (let y = 1; y < canvas.height/20; y += 1) {
+        for (let y = 1; y < canvas.height/Number(localStorage.getItem('scale')); y += 1) {
             ctx.fillStyle = '#8D8D8D';
-            ctx.font = '10px Arial';
+            ctx.font = `${.5*Number(localStorage.getItem('scale'))}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`${y}`, 11, y*20+10);
+            ctx.fillText(`${y}`, 0.55*Number(localStorage.getItem('scale')), (y+.5)*Number(localStorage.getItem('scale')));
         }
     }
         

@@ -1,31 +1,45 @@
 import { EventListener } from '../lib/MRLib/events.js';
-import { getRelationGraph } from './pathfinding.js';
-import { Vehicle } from './vehicles.js';
+import { pixelsToCoords, coordsToPixels } from '../lib/MRLib/coords.js';
 
-class Map {
-    constructor(canvas) {
-        this.canvas = canvas;
+import { Layer } from './layers.js';
+import { getRelationGraph, getShortestRoute } from './pathfinding.js';
+import { Vehicle, Car } from './vehicles.js';
+
+
+class Map extends Layer {
+    constructor(canvas, playground) {
+        super(canvas, playground);
 
         this.buildings = [];
         this.roads = [];
 
         this.resize();
+
+        window.addEventListener('storage', (e) => {
+            if (e.key == 'showBuildings' || e.key == 'showRoads') { this.redraw(); }
+        });
     }
 
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.redraw();
-    }
     redraw() {
-        this.buildings.forEach(building => building.draw(this.canvas));
-        this.roads.forEach(road => road.draw(this.canvas));
+        this.clear();
+        if (localStorage.getItem('showBuildings') == 'true') {
+            this.buildings.forEach(building => building.draw(this.canvas));
+        }
+        if (localStorage.getItem('showRoads') == 'true') {
+            this.roads.forEach(road => road.draw(this.canvas));
+        }
+    }
+
+    getAllInfrastructures() {
+        return this.buildings.concat(this.roads);
     }
 
     // Buildings
     addBuilding(building) {
         this.buildings.push(building);
+        building.map = this;
         building.draw(this.canvas);
+
         this.updateRelations();
         
         this.buildings.forEach(b => {
@@ -34,7 +48,7 @@ class Map {
     }
     removeBuilding(building) {
         this.buildings = this.buildings.filter(b => b.id != building.id);
-        this.redrawMap();
+        this.redraw();
         this.updateRelations();
     }
     getBuildings() {
@@ -47,7 +61,9 @@ class Map {
     // Roads
     addRoad(road) {
         this.roads.push(road);
+        road.map = this;
         road.draw(this.canvas);
+
         this.updateRelations();
 
         this.roads.forEach(r => {
@@ -56,7 +72,7 @@ class Map {
     }
     removeRoad(road) {
         this.roads = this.roads.filter(r => r.id != road.id);
-        this.redrawMap();
+        this.redraw();
         this.updateRelations();
     }
     getRoads() {
@@ -102,8 +118,14 @@ class Infrastructure extends EventListener {
     constructor(position) {
         super();
         this.id = Math.random().toString(36).substr(2, 9);
+        
+        this.scale = Number(localStorage.getItem('scale'));
         this.position = position;
+        this.canvas_position = coordsToPixels(this.position, Number(localStorage.getItem('scale')));
+
         this.connections = [];
+
+        window.addEventListener('storage', () => { if (localStorage.getItem('scale')) { this.scale = Number(localStorage.getItem('scale')); }});
     }
 
     /**
@@ -121,11 +143,36 @@ class Infrastructure extends EventListener {
     }
 }
 
+class Building extends Infrastructure {
+    constructor(position, size) {
+        super(position);
+        this.size = size;
+        this.canvas_size = { x: size.x * this.scale, y: size.y * this.scale };
+
+        this.vehicles_interval = setInterval(() => {
+            if (Math.random() > 0.9) {
+                this.map.playground.entities.addVehicle(new Car(this, this.map.buildings.filter(b => b != this)[Math.floor(Math.random() * this.map.buildings.filter(b => b != this).length)]));
+            }
+        }, 200/Number(localStorage.getItem('timeSpeed')));
+
+        window.addEventListener('storage', (e) => {
+            if (e.key == 'timeSpeed') {
+                clearInterval(this.vehicles_interval);
+                this.vehicles_interval = setInterval(() => {
+                    if (Math.random() > 0.9) {
+                        this.map.playground.entities.addVehicle(new Car(this, this.map.buildings.filter(b => b != this)[Math.floor(Math.random() * this.map.buildings.filter(b => b != this).length)]));
+                    }
+                }, 200/Number(localStorage.getItem('timeSpeed')));
+            }
+        });
+    }
+}
+
 /**
  * Parking class - An infrastructure where vehicles can be parked
  * @extends Infrastructure
  */
-class Parking extends Infrastructure {
+class Parking extends Building {
     /**
      * Parking - An infrastructure where vehicles can be parked
      * @param {object} position {x: int, y: int}
@@ -133,20 +180,27 @@ class Parking extends Infrastructure {
      * @param {int} capacity 
      */
     constructor(position, size, capacity) {
-        super(position);
-        this.size = size;
+        super(position, size);
         this.capacity = capacity;
         this.vehicles = [];
+
+        this.generated_vehicles = [Car];
     }
 
     /**
      * Draw parking on canvas
-     * @param {HTMLCanvasElement} canva 
+     * @param {HTMLCanvasElement} canvas 
      */
-    draw(canva) {
-        const ctx = canva.getContext('2d');
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(this.position.x, this.position.y, this.size.x, this.size.y);
+    draw(canvas) {
+        this.scale = Number(localStorage.getItem('scale'));
+        this.canvas_position = coordsToPixels(this.position, this.scale);
+        this.canvas_size = { x: this.size.x * this.scale, y: this.size.y * this.scale };
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = 'src/assets/textures/parking3x3.svg';
+        img.onload = () => {
+            ctx.drawImage(img, this.canvas_position.x-this.scale, this.canvas_position.y-this.scale, this.canvas_size.x, this.canvas_size.y);
+        }
     }
 
     /**
@@ -156,10 +210,6 @@ class Parking extends Infrastructure {
     addVehicle(vehicle) {
         if (this.vehicles.length < this.capacity) {
             this.vehicles.push(vehicle);
-            vehicle.position = this.position;
-        }
-        else {
-            console.log('Parking is full');
         }
     }
 
@@ -175,11 +225,17 @@ class Parking extends Infrastructure {
     }
 }
 
+class Route extends Infrastructure {
+    constructor(position) {
+        super(position);
+    }
+}
+
 /**
  * Road class - An infrastructure that connects buildings
  * @extends Infrastructure
  */
-class Road extends Infrastructure {
+class Road extends Route {
     /**
      * Road - An infrastructure that connects buildings, cars can drive on it
      * @param {object} start {x: int, y: int}
@@ -188,20 +244,34 @@ class Road extends Infrastructure {
     constructor(start, end) {
         super(start);
         this.end = end;
+        this.canvas_end = coordsToPixels(end, Number(localStorage.getItem('scale')));
+        this.size = { x: 1, y: 1 }
+
+        this.occupied_cells = [];
+        for (let x = Math.min(this.position.x, this.end.x); x <= Math.max(this.end.x, this.position.x); x++) {
+            for (let y = Math.min(this.position.y, this.end.y); y <= Math.max(this.end.y, this.position.y); y++) {
+                this.occupied_cells.push({ x: x, y: y });
+            }
+        }
     }
 
     /**
      * Draw road on canvas
-     * @param {HTMLCanvasElement} canva 
+     * @param {HTMLCanvasElement} canvas 
      */
-    draw(canva) {
-        const ctx = canva.getContext('2d');
+    draw(canvas) {
+        this.scale = Number(localStorage.getItem('scale'));
+        this.canvas_position = coordsToPixels(this.position, this.scale);
+        this.canvas_end = coordsToPixels(this.end, this.scale);
+        const ctx = canvas.getContext('2d');
         ctx.beginPath();
         ctx.fillStyle = 'black';
-        ctx.lineWidth = 20;
-        ctx.moveTo(this.position.x, this.position.y);
-        ctx.lineTo(this.end.x, this.end.y);
+        ctx.lineWidth = Number(localStorage.getItem('scale'));
+        ctx.moveTo(this.canvas_position.x - this.scale/2, this.canvas_position.y - this.scale/2);
+        ctx.lineTo(this.canvas_end.x - this.scale/2, this.canvas_end.y - this.scale/2);
         ctx.stroke();
+        ctx.fillRect(this.canvas_position.x - this.scale, this.canvas_position.y - this.scale, this.scale, this.scale);
+        ctx.fillRect(this.canvas_end.x-this.scale, this.canvas_end.y-this.scale, this.scale, this.scale);
     }
 }
 
@@ -209,24 +279,28 @@ class Road extends Infrastructure {
  * Junction class - An infrastructure that connects roads
  * @extends Infrastructure
  */
-class Junction extends Infrastructure {
+class Junction extends Route {
     /**
      * Junction - An infrastructure that connects roads
      * @param {object} position `{x: int, y: int}`
      */
     constructor(position) {
         super(position);
+        this.occupied_cells = [{ x: this.position.x, y: this.position.y }];
+        this.size = { x: 1, y: 1 }
     }
 
     /**
      * Draw junction on canvas
-     * @param {HTMLCanvasElement} canva 
+     * @param {HTMLCanvasElement} canvas 
      */
-    draw(canva) {
-        const ctx = canva.getContext('2d');
+    draw(canvas) {
+        this.scale = Number(localStorage.getItem('scale'));
+        this.canvas_position = coordsToPixels(this.position, this.scale);
+        const ctx = canvas.getContext('2d');
         ctx.fillStyle = 'red';
-        ctx.fillRect(this.position.x, this.position.y, 20, 20);
+        ctx.fillRect(this.canvas_position.x - this.scale, this.canvas_position.y - this.scale, Number(localStorage.getItem('scale')), Number(localStorage.getItem('scale')));
     }
 }
 
-export { Map, Parking, Road, Junction };
+export { Map, Infrastructure, Building, Parking, Route, Road, Junction };
