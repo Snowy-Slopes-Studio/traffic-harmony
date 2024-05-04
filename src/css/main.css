@@ -1,6 +1,37 @@
+@font-face {
+	font-family: "Nunito";
+	src: url("../assets/fonts/Nunito-VariableFont_wght.ttf");
+}
+@font-face {
+	font-family: "Roboto";
+	src: url("../assets/fonts/Roboto-Regular.ttf");
+}
+
 html, body {
 	margin: 0;
 	padding: 0;
+	background-color: #ededed;
+}
+
+#loading-screen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 100;
+	width: 100vw;
+	height: 100vh;
+
+	background-color: #ededed;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	font-size: 3rem;
+	font-family: Roboto, sans-serif
+}
+#loading-screen.hidden {
+	display: none;
 }
 
 #playground {
@@ -13,7 +44,6 @@ html, body {
 	top: 0;
 	left: 0;
 }
-
 #background {
 	z-index: 1;
 }
@@ -25,4 +55,177 @@ html, body {
 }
 #ui {
 	z-index: 4;
+}
+
+
+#hotbar {
+	position: absolute;
+	top: 25px;
+	right: 15px;
+	z-index: 10;
+	height: 50px;
+	padding: 5px;
+
+	display: flex;
+	flex-direction: row;
+}
+
+#hotbar .button {
+	width: 50px;
+	height: 50px;
+}
+
+
+#hotbar .pause-button .icon {
+	mask-image: url("../assets/icons/pause.svg");
+}
+#hotbar .resume-button .icon {
+	mask-image: url("../assets/icons/resume.svg");
+}
+
+#hotbar .time-speed-button .icon {
+	mask-image: url("../assets/icons/time-speed-0.svg");
+}
+#hotbar .time-speed-button.level-1 .icon {
+	mask-image: url("../assets/icons/time-speed-1.svg");
+}
+#hotbar .time-speed-button.level-2 .icon {
+	mask-image: url("../assets/icons/time-speed-2.svg");
+}
+#hotbar .time-speed-button.level-3 .icon {
+	mask-image: url("../assets/icons/time-speed-3.svg");
+}
+
+#hotbar .menu-button .icon {
+	mask-image: url("../assets/icons/hamburger-menu.svg");
+}
+
+
+.main.nmorph-box {
+	position: relative;
+	z-index: 20;
+
+	opacity: 0;
+	padding: 20px 50px;
+}
+.active .main {
+	opacity: 1;
+
+	transition: opacity .5s ease-in-out, background-color .5s ease-in-out .5s, box-shadow .5s ease-in-out .5s;
+}
+
+.main * {
+	opacity: 0;
+}
+
+.main h1 {
+	font-size: 8vw;
+	margin: 0;
+	font-family: Nunito, sans-serif;
+	font-weight: 800;
+	color: transparent;
+
+	opacity: 1;
+	text-shadow: none;
+	transform: scale(.95);
+}
+
+.active .main h1 {
+	color: #ededed;
+	
+	transform: scale(1);
+	text-shadow: 4px 4px 8px #c9c9c9,
+				-4px -4px 8px #ffffff;
+
+	transition: text-shadow 1s ease-in-out 1s, transform 1s ease-in-out 1s, color 1s ease-in-out 1s, opacity 1s ease-in-out 1s;
+}
+
+.main p {
+	margin: 0;
+
+	font-size: 1em;
+	font-family: Roboto;
+	color: rgba(100, 100, 100, 1);
+}
+.active .main p {
+	opacity: 1;
+
+	transition: opacity .5s ease-in-out 2s;
+}
+
+.main .button-container {
+	opacity: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.main .button {
+	width: 100px;
+	border-radius: calc(1em + 5px);
+	font-size: 1em;
+
+	margin: 0 10px;
+	padding: 10px 5px;
+
+	transition: box-shadow .1s ease-in-out, opacity .5s ease-in-out;
+}
+.active .main .button {
+	opacity: 1;
+}
+.active .main .button:nth-child(1) {
+	transition-delay: 0s, 2.5s !important;
+}
+.active .main .button:nth-child(2) {
+	transition-delay: 0s, 2.75s !important;
+}
+.active .main .button:nth-child(3) {
+	transition-delay: 0s, 3s !important;
+}
+
+.menu-container.active .settings {
+	width: 0;
+	padding: 20px 50px;
+	overflow-x: hidden;
+	white-space: nowrap;
+
+	position: relative;
+	left: -400px;
+	visibility: hidden;
+
+	transition: width .5s ease-in-out .5s, left .5s ease-in-out, visibility .5s ease-in-out .5s;
+}
+.menu-container.active .settings.active {
+	width: 300px;
+	left: 20px;
+	visibility: visible;
+
+	transition: width .5s ease-in-out, left .5s ease-in-out .5s, visibility .5s ease-in-out;
+}
+.menu-container.active .settings:not(.active) {
+	box-shadow: none;
+}
+
+.menu-container:not(.active) .settings {
+	visibility: hidden;
+}
+
+.menu-container .settings h2 {
+	font-family: Nunito, sans-serif;
+	font-size: 2em;
+	margin: 0;
+
+}
+
+
+.menu-container .sss-logo {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: 100px;
+	height: 100px;
+	background-image: url("../assets/icons/sss-logo.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
 }

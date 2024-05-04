@@ -1,0 +1,47 @@
+* {
+	--neumorphism-shadow-out: 5px 5px 10px #bebebe,
+							 -5px -5px 10px #ffffff;
+	--neumorphism-shadow-in: inset 5px 5px 10px #c9c9c9,
+							 inset -5px -5px 10px #ffffff;
+    --nmorph-bg: #ededed;
+    --nmorph-color: #969696;
+}
+
+.nmorph-box {
+	border-radius: 10px;
+    transition: background-color .1s ease-in-out, box-shadow .1s ease-in-out;
+}
+.nmorph-box:not(.apparition) {
+	background-color: var(--nmorph-bg);
+	box-shadow: var(--neumorphism-shadow-out);
+}
+.nmorph-box.apparition.active, .nmorph-box.apparition {
+    background-color: var(--nmorph-bg);
+    box-shadow: var(--neumorphism-shadow-out);
+}
+
+.nmorph-button {
+	background: var(--nmorph-bg);
+	box-shadow:  var(--neumorphism-shadow-out);
+    transition: box-shadow .1s ease-in-out;
+    border: var(--nmorph-bg) 1px solid;
+}
+.nmorph-button:hover:not(.active):not(:active) {
+    border: #e3e3e3 1px solid;
+    box-shadow: none;
+}
+.nmorph-button.active, .nmorph-button:active {
+    box-shadow: var(--neumorphism-shadow-in);
+}
+
+.nmorph-button .icon {
+	background-color: var(--nmorph-color);
+}
+.nmorph-button.no-label.active .icon, .nmorph-button.no-label:active .icon {
+    width: 90%; height: 90%;
+    margin: 1% 0 0 1%;
+}
+
+.round {
+	border-radius: 50%;
+}

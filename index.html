@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Traffic Harmony</title>
     <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/neumorphism.css">
+    <link rel="stylesheet" href="src/css/ui.css">
     <link rel="manifest" href="manifest.json" />
+
     <script src="src/js/main.js" type="module" defer></script>
+    <script src="src/js/ui.js" type="module" defer></script>
 
     <meta name="theme-color" content="#ffffff">
     <meta name="description" content="Traffic Harmony - Just a chill traffic game.">
@@ -19,11 +23,52 @@
     <meta name="twitter:description" content="Traffic Harmony - Just a chill traffic game.">
 </head>
 <body>
+    <div id="loading-screen">
+        <p>Loading...</p>
+    </div>
     <div id="playground">
         <canvas id="ui"></canvas>
         <canvas id="entities"></canvas>
         <canvas id="map">Unsupported Browser</canvas>
         <canvas id="background"></canvas>
+    </div>
+    <div id="hotbar" class="nmorph-box">
+        <button class="pause-button nmorph-button button round no-label"><span class="icon"></span><span class="label">Pause</span></button>
+        <button class="time-speed-button nmorph-button button round no-label"><span class="icon"></span><span class="label">Speed</span></button>
+        <button class="menu-button nmorph-button button round no-label"><span class="icon"></span><span class="label">Menu</span></button>
+    </div>
+    <div id="menu" class="menu-container blur-bg">
+        <div class="main nmorph-box apparition">
+            <h1>Traffic Harmony</h1>
+            <p>Just a chill traffic game.</p>
+            <div class="button-container">
+                <button class="play-button button nmorph-button">Play</button>
+                <button class="settings-button button nmorph-button">Settings</button>
+            </div>
+        </div>
+        <div class="settings nmorph-box">
+            <h2>Settings</h2>
+            <div class="setting">
+                <label for="setting-coords">Show cords</label>
+                <input type="checkbox" id="setting-coords">
+            </div>
+            <div class="setting">
+                <label for="setting-coords-system">Coords system</label>
+                <select id="setting-coords-system">
+                    <option value="numeric">Numeric</option>
+                    <option value="alphaNumeric">Alphanumeric</option>
+                </select>
+            </div>
+            <div class="setting">
+                <label for="setting-grid">Show grid</label>
+                <input type="checkbox" id="setting-grid">
+            </div>
+            <div class="setting">
+                <label for="setting-scale">Scale</label>
+                <input type="range" id="setting-scale" min="10" max="50" step="5" value="20">
+            </div>
+        </div>
+        <!-- <a class="sss-logo"><img src="/src/assets/images/sss-logo.png" alt="Snowy Slopes Studio logo"></a> -->
     </div>
 </body>
 </html>
